@@ -44,8 +44,8 @@ runs:
 
         cd susfs4ksu
         
-        COMMIT1="532ae5e7f05bef75011acb378e38f023a6b51b3f"                    # fill in
-        COMMIT2="976de54d311f7369030a242060cade8d8abb7839"                    # fill in
+        COMMIT1="e03f6b0773402aa2e121160745143d2539d4475c"                    # kernel_patches: fs/susfs: Implement SuSFS and Toolkit coexistence
+        COMMIT2="342c7ea156190ff2cc905bb6bf18d3807af84014"                    # kernel_patches: fs/susfs: Allow core to be built with no features
 
         git remote add pershoot https://gitlab.com/pershoot/susfs4ksu.git
         git fetch pershoot gki-android14-6.1-dev
