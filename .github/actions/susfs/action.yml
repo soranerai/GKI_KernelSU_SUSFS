@@ -211,6 +211,12 @@ runs:
       working-directory: ${{ github.workspace }}/kernel/common
       run: |
         patch -p1 < 50_add_susfs_in_gki-${{ inputs.version }}.patch
+        if [[ "${{ inputs.version }}" == *"5.10"* || "${{ inputs.version }}" == *"5.15"* ]]; then
+          if ! grep -q '#include <linux/pgsize_migration.h>' fs/proc/task_mmu.c; then
+            sed -i '/#include <linux\/proc_fs.h>/a #include <linux/pgsize_migration.h>' fs/proc/task_mmu.c
+            echo "Added pgsize_migration.h include to fs/proc/task_mmu.c"
+          fi
+        fi
 
     - name: Revert Android 12 5.10 Fake Patches
       shell: bash
