@@ -38,8 +38,9 @@ runs:
 
         if [ -n "${{ inputs.susfs_commit }}" ]; then
           echo "Checking out SUSFS commit: ${{ inputs.susfs_commit }}"
-          cd ${{ github.workspace }}/susfs4ksu
+          cd susfs4ksu
           git checkout "${{ inputs.susfs_commit }}"
+          cd ..
         fi
 
         cd susfs4ksu
