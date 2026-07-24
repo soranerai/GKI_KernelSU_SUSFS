@@ -20,19 +20,13 @@ runs:
       run: |
         set -euo pipefail
 
-        # On self-hosted runners, packages might already be installed.
-        # Check if compiler binaries exist before trying apt-get (which requires sudo).
-        if command -v clang &>/dev/null && command -v aarch64-linux-gnu-gcc &>/dev/null && dpkg -s libelf-dev &>/dev/null; then
-          echo "✅ Build dependencies are already satisfied."
-        else
-          echo "Installing FUSE-BPF build dependencies..."
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq \
-            clang llvm binutils-aarch64-linux-gnu \
-            libelf-dev libgelf-dev \
-            gcc-aarch64-linux-gnu \
-            elfutils
-        fi
+        echo "Installing FUSE-BPF build dependencies..."
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq \
+          clang llvm binutils-aarch64-linux-gnu \
+          libelf-dev libgelf-dev \
+          gcc-aarch64-linux-gnu \
+          elfutils
 
     - name: Build BPF Object (fd_bpf.bpf) for arm64
       shell: bash

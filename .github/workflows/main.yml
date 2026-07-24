@@ -95,7 +95,7 @@ on:
 jobs:
   prepare-ccache:
     name: Prepare ccache binary (download once)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Download custom ccache once
         run: |
@@ -210,8 +210,8 @@ jobs:
     secrets: inherit
 
   rej:
-    if: false
-    runs-on: self-hosted
+    if: ${{ !inputs.test_release_notes && always() }}
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
@@ -296,8 +296,8 @@ jobs:
         if-no-files-found: ignore
 
   summary:
-    if: false
-    runs-on: self-hosted
+    if: ${{ !inputs.test_release_notes && always() }}
+    runs-on: ubuntu-latest
     permissions:
       actions: write
       contents: read
@@ -388,7 +388,7 @@ jobs:
         done
 
   release:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' && !inputs.test_release_notes && (inputs.release_type == 'Pre-Release' || inputs.release_type == 'Release') }}
     permissions:
       contents: write
