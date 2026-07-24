@@ -38,9 +38,8 @@ runs:
 
         if [ -n "${{ inputs.susfs_commit }}" ]; then
           echo "Checking out SUSFS commit: ${{ inputs.susfs_commit }}"
-          cd susfs4ksu
+          cd ${{ github.workspace }}/susfs4ksu
           git checkout "${{ inputs.susfs_commit }}"
-          cd ..
         fi
 
         cd susfs4ksu
@@ -211,16 +210,6 @@ runs:
       working-directory: ${{ github.workspace }}/kernel/common
       run: |
         patch -p1 < 50_add_susfs_in_gki-${{ inputs.version }}.patch
-        if [[ "${{ inputs.version }}" == *"5.10"* || "${{ inputs.version }}" == *"5.15"* ]]; then
-          if ! grep -q 'pgsize_migration' fs/proc/task_mmu.c; then
-            sed -i '1a #ifndef VMA_PAD_START\n#define VMA_PAD_START(vma) ((vma)->vm_end)\n#endif' fs/proc/task_mmu.c
-            echo "Added VMA_PAD_START fallback definition to fs/proc/task_mmu.c"
-          fi
-        fi
-        if grep -q '__fold_filemap_fixup_entry' fs/proc/task_mmu.c && ! grep -q '#include <linux/page_size_compat.h>' fs/proc/task_mmu.c; then
-          sed -i '/#include <linux\/pkeys.h>/a #include <linux/page_size_compat.h>' fs/proc/task_mmu.c
-          echo "Added page_size_compat.h include to fs/proc/task_mmu.c"
-        fi
 
     - name: Revert Android 12 5.10 Fake Patches
       shell: bash

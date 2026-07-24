@@ -34,8 +34,8 @@ runs:
         #  patch -p1 -N < ${{ github.action_path }}/patches/0002-lockdep-fix-init-map-confusion.patch
         #fi
 
-        if [[ "${{ inputs.version }}" == *"5.10"* || "${{ inputs.version }}" == *"5.15"* ]]; then
-          patch -p1 -N < ${{ github.action_path }}/patches/0003-lockdep-assert-none-held.patch || true
+        if [[ ( ${{ inputs.version }} == "android12-5.10" && "${{ inputs.sublevel }}" -le "208" ) || ( ${{ inputs.version }} = "android13-5.10" && "${{ inputs.sublevel }}" -le "210" ) ]]; then
+          patch -p1 -N < ${{ github.action_path }}/patches/0003-lockdep-assert-none-held.patch
         fi
         
         if [[ ${{ inputs.version }} = "android13-5.10" ]]; then
