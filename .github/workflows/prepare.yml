@@ -29,7 +29,7 @@ on:
 
 jobs:
   generate-matrix:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, alpha]
     outputs:
       matrix: ${{ steps.final.outputs.matrix }}
     steps:
