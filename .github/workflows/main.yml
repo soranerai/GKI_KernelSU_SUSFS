@@ -210,7 +210,7 @@ jobs:
     secrets: inherit
 
   rej:
-    if: ${{ !inputs.test_release_notes && always() }}
+    if: false
     runs-on: self-hosted
     permissions:
       actions: read
@@ -296,7 +296,7 @@ jobs:
         if-no-files-found: ignore
 
   summary:
-    if: ${{ !inputs.test_release_notes && always() }}
+    if: false
     runs-on: self-hosted
     permissions:
       actions: write
