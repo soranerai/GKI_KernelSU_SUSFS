@@ -51,7 +51,7 @@ jobs:
       uses: ./.github/actions/disk-cleanup
 
     - name: Free Disk Space
-      if: true
+      if: false
       uses: endersonmenezes/free-disk-space@v3  # Use @main for latest, @v3 for stable
       with:
         remove_android: true
@@ -66,6 +66,7 @@ jobs:
         testing: false
 
     - name: Setup more Swap (for LTO)
+      if: false
       uses: thejerrybao/setup-swap-space@v1   # or pierotofy/set-swap-space
       with:
         swap-size-gb: 16          # 10-24 GB is common for heavy LTO
