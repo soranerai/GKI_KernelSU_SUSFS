@@ -95,7 +95,7 @@ on:
 jobs:
   prepare-ccache:
     name: Prepare ccache binary (download once)
-    runs-on: [self-hosted, alpha]
+    runs-on: self-hosted
     steps:
       - name: Download custom ccache once
         run: |
@@ -211,7 +211,7 @@ jobs:
 
   rej:
     if: ${{ !inputs.test_release_notes && always() }}
-    runs-on: [self-hosted, alpha]
+    runs-on: self-hosted
     permissions:
       actions: read
       contents: read
@@ -297,7 +297,7 @@ jobs:
 
   summary:
     if: ${{ !inputs.test_release_notes && always() }}
-    runs-on: [self-hosted, alpha]
+    runs-on: self-hosted
     permissions:
       actions: write
       contents: read
@@ -388,7 +388,7 @@ jobs:
         done
 
   release:
-    runs-on: [self-hosted, alpha]
+    runs-on: self-hosted
     if: ${{ github.event_name == 'workflow_dispatch' && !inputs.test_release_notes && (inputs.release_type == 'Pre-Release' || inputs.release_type == 'Release') }}
     permissions:
       contents: write
