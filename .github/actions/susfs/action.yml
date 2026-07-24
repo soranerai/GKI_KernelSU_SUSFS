@@ -217,6 +217,10 @@ runs:
             echo "Added VMA_PAD_START fallback definition to fs/proc/task_mmu.c"
           fi
         fi
+        if grep -q '__fold_filemap_fixup_entry' fs/proc/task_mmu.c && ! grep -q '#include <linux/page_size_compat.h>' fs/proc/task_mmu.c; then
+          sed -i '/#include <linux\/pkeys.h>/a #include <linux/page_size_compat.h>' fs/proc/task_mmu.c
+          echo "Added page_size_compat.h include to fs/proc/task_mmu.c"
+        fi
 
     - name: Revert Android 12 5.10 Fake Patches
       shell: bash
