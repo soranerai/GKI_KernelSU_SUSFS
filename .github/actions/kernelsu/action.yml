@@ -49,13 +49,13 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}/kernel/KernelSU-Next
       run: |
-        # Fetch dev branch for version info (tags, commits, etc.)
-        git fetch --depth=50 origin dev 2>/dev/null || true
-        
-        # Extract and export KSU version info from dev branch
-        KSU_GIT_VERSION=$(git rev-list --count origin/dev 2>/dev/null)
-        KSU_GIT_TAG=$(git describe --tags --abbrev=0 origin/dev 2>/dev/null || echo "")
-        KSU_COMMIT=$(git rev-parse --short origin/dev 2>/dev/null)
+        # Get the base branch name by stripping suffixes (e.g., dev-susfs -> dev)
+        BASE_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed 's:-.*::' 2>/dev/null)
+        # Find the merge-base with the official origin branch to exclude local commits
+        BASE_COMMIT=$(git merge-base HEAD refs/remotes/origin/$BASE_BRANCH 2>/dev/null || git merge-base HEAD refs/remotes/origin/main 2>/dev/null || echo HEAD)
+        KSU_GIT_VERSION=$(git rev-list --count $BASE_COMMIT 2>/dev/null)
+        KSU_GIT_TAG=$(git describe --tags --abbrev=0 $BASE_COMMIT 2>/dev/null || echo "")
+        KSU_COMMIT=$(git rev-parse --short HEAD 2>/dev/null)
         KSU_VERSION=$((30000 + KSU_GIT_VERSION))
         
         echo "KSU_GIT_TAG=$KSU_GIT_TAG" >> $GITHUB_ENV

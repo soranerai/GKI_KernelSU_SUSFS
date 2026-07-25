@@ -1,0 +1,156 @@
+name: 'Apply SUSFS Patches'
+description: 'Copy base SUSFS patches and apply version-specific fake patches'
+inputs:
+  version:
+    description: 'Kernel config version (e.g., android15-6.6)'
+    required: true
+  sublevel:
+    description: 'Kernel sublevel'
+    required: true
+  os_patch_level:
+    description: 'OS patch level (e.g., 2024-07)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Apply Kernel SUSFS Patches
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        # Apply base SUSFS patches
+        cp "${{ github.workspace }}/susfs4ksu/kernel_patches/fs/"* "${{ github.workspace }}/kernel/common/fs/"
+        cp "${{ github.workspace }}/susfs4ksu/kernel_patches/include/linux/"* "${{ github.workspace }}/kernel/common/include/linux/"
+        cp ${{ github.workspace }}/susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.version }}.patch ./
+
+    - name: Apply Android 12 5.10 Fake Patches
+      shell: bash
+      if: inputs.version == 'android12-5.10'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        if [ "${{ inputs.sublevel }}" -le "43" ]; then
+          echo "Applying base.c Android 12 5.10 Fake Patch"
+          perl -i -pe 's/(int|size_t)\s+this_len\s*=\s*min_t\s*\(\s*\1\s*,/size_t this_len = min_t(size_t,/;' fs/proc/base.c
+        fi
+        if [ "${{ inputs.sublevel }}" -le "117" ]; then
+          echo "Applying fdinfo.c Android 12 5.10 Fake Patch"
+          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
+          perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+        fi
+
+    - name: Apply Android 13 5.10 Fake Patches
+      shell: bash
+      if: inputs.version == 'android13-5.10'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        echo "Applying Android 13 5.10 SUSFS fixes"
+        if [ "${{ inputs.sublevel }}" -le "107" ]; then
+          echo "Applying fdinfo.c Android 13 5.10 Fake Patch"
+          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
+          perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+        fi
+
+    - name: Apply Android 13 5.15 Fake Patches
+      shell: bash
+      if: inputs.version == 'android13-5.15'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        echo "Applying Android 13 5.15 SUSFS fixes"
+        if [ "${{ inputs.sublevel }}" -le "41" ]; then
+          echo "Applying namespace.c Android 13 5.15 SUSFS fixes"
+          sed -i '/^#include <linux\/shmem_fs.h>$/a #include <linux/mnt_idmapping.h>' fs/namespace.c
+          echo "Applying open.c Android 13 5.15 Fake Patch"
+          sed -i '/^#include <linux\/compat.h>$/a #include <linux/mnt_idmapping.h>' fs/open.c
+          echo "Applying fdinfo.c Android 13 5.15 Fake Patch"
+          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
+          perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+        fi
+        if [ "${{ inputs.sublevel }}" -ge "197" ]; then
+          echo "Applying namespace.c Android 13 5.15 Fake Patch"
+          sed -i '/^#include <trace\/hooks\/blk.h>$/d' fs/namespace.c
+        fi
+        if [ "${{ inputs.sublevel }}" -ge "197" ]; then
+          echo "Applying task_mmu.c Android 13 5.15 Fake Patch"
+          sed -i '/^#include <trace\/hooks\/mm.h>$/d' fs/proc/task_mmu.c
+        fi
+
+    - name: Apply Android 14 6.1 Fake Patches
+      shell: bash
+      if: inputs.version == 'android14-6.1'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        if [ "${{ inputs.sublevel }}" -le "25" ]; then
+          echo "Applying base.c Android 14 6.1 Fake Patch"
+          sed -i '/^#include <trace\/events\/oom.h>$/a #include <trace/hooks/sched.h>' fs/proc/base.c
+        fi
+        if [ "${{ inputs.sublevel }}" -le "141" ]; then
+          echo "Applying base.c Android 14 6.1 Fake Patch"
+          sed -i '/^#include <linux\/cpufreq_times.h>$/a #include <linux/dma-buf.h>' fs/proc/base.c
+        fi
+        if [ "${{ inputs.sublevel }}" -ge "157" ]; then
+          echo "Applying namespace.c Android 14 6.1 Fake Patch"
+          sed -i '/^#include <trace\/hooks\/blk.h>$/d' fs/namespace.c
+        fi
+
+    - name: Apply Android 15 6.6 Fake Patches
+      shell: bash
+      if: inputs.version == 'android15-6.6'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        echo "Applying 6.6 SUSFS fixes"
+        if [ "${{ inputs.sublevel }}" -le "30" ]; then
+          echo "Applying taskmmu.c Android 15 6.6 Fake Patch"
+          sed -i '/smap_gather_stats(vma, &mss, last_vma_end);/a\last_vma_end = vma->vm_end;' fs/proc/task_mmu.c
+          perl -0777 -i -pe '
+          @l = split /\n/;
+          for ($i = $#l; $i >= 0; $i--) {
+              if ($l[$i] =~ /last_vma_end = vma->vm_end;/) {
+                  $l[$i] = "\t\t\t\t" . $l[$i];
+                  splice(@l, $i + 1, 0, "\t\t\t}");
+
+                  # add { to the if line above
+                  for ($j = $i; $j >= 0; $j--) {
+                      if ($l[$j] =~ /if\s*\(vma->vm_end > last_vma_end\)/) {
+                          $l[$j] =~ s/\)\s*\$/) {/;
+                          last;
+                      }
+                  }
+
+                  last;
+              }
+          }
+          $_ = join "\n", @l
+          ' fs/proc/task_mmu.c
+        fi
+        if [ "${{ inputs.sublevel }}" -le "92" ]; then
+          echo "Applying base.c Android 15 6.6 Fake Patch"
+          sed -i '/^#include <linux\/cpufreq_times.h>$/a #include <linux/dma-buf.h>' fs/proc/base.c
+        fi
+        if [ "${{ inputs.sublevel }}" -le "57" ]; then
+          echo "Applying base.c Android 15 6.6 Fake Patch"
+          sed -i '/^#include <linux\/sched\/sysctl.h>$/a #include <linux/zswap.h>' mm/memory.c
+        fi
+
+    - name: Apply Android 16 6.12 Fake Patches
+      shell: bash
+      if: inputs.version == 'android16-6.12'
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        echo "Applying 6.12 SUSFS fixes"
+        if [ "${{ inputs.sublevel }}" -ge "58" ]; then
+          echo "Applying exec.c Android 16 6.12 Fake Patch"
+          sed -i '/^#include <linux\/dma-buf.h>$/d' fs/exec.c
+        fi
+        if [ "${{ inputs.sublevel }}" -ge "69" ]; then
+          echo "Applying task_mmu.c Android 16 6.12 Fake Patch"
+          sed -i 's/vma_data_pages/vma_pages/g' fs/proc/task_mmu.c
+        fi
+
+    - name: Apply Kernel SUSFS Patches
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        patch -p1 < 50_add_susfs_in_gki-${{ inputs.version }}.patch

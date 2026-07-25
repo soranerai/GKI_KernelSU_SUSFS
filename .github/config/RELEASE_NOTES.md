@@ -70,13 +70,14 @@ A lightweight, LXC-inspired container runtime for Android and Linux. Run full Li
 ## Networking {#networking-improvements}
 
 - BBRv1 - Improved TCP congestion control
-- BBRv3 - Improved TCP congestion control (coming soon!)
+- BBRv3 - Improved TCP congestion control — available for Android 12 (5.10) through Android 15 (6.6), Android 16 (6.12) coming soon
 - Wireguard - Built-in VPN support
 - IP Set & IPv6 NAT Support - Advanced firewall capabilities
 - TTL Target Support - Network packet manipulation
 - CAKE, fq, fq_codel - Traffic shaping and fair queuing for reduced lag and balanced bandwidth
 - connmark - Connection marking for packet classification
 - TCP congestion control - CUBIC, BIC, Westwood, and HTCP for optimized performance across different network conditions
+- CIFS - Network filesystem support (SMB/CIFS sharing)
 
 ## Other Features
 
@@ -91,13 +92,14 @@ Provide high-performance, low-latency synchronization primitives compatible with
 
 - Ptrace Leak Fix: For kernels < 5.16
 - Unicode Fix: Prevent path traversal and other detections using non-printable Unicode codepoints [Experimental]
+- BTF/eBPF Support: CONFIG_BTF, CONFIG_BPF_EVENTS, CONFIG_FUSE_BPF for debugging and eBPF tooling
 - TMPFS_XATTR: Extended attributes for tmpfs (Mountify support)
 - TMPFS_POSIX_ACL: POSIX ACLs for tmpfs
 
 ## Changelog
 
 ### This Release
-- Added BBRv3 (delayed)
+- Added BBRv3 — available for Android 12 (5.10) through Android 15 (6.6)
 - Added NTSync
 - Ptrace Leak Fix - For kernels < 5.16
 - Unicode Fix - Prevent path traversal and other detections using non-printable Unicode codepoints [Experimental]
