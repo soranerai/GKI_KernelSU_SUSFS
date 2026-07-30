@@ -22,4 +22,8 @@ runs:
 
         if [ -d "${{ github.workspace }}/AnyKernel3" ]; then rm -rf "${{ github.workspace }}/AnyKernel3"; fi
         git clone https://github.com/WildKernels/AnyKernel3.git -b gki-2.0 "${{ github.workspace }}/AnyKernel3"
+
+        # Install build deps needed for BTF generation on older kernels (android12-5.10)
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq dwarves libelf-dev
         

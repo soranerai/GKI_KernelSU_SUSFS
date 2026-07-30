@@ -29,8 +29,10 @@ runs:
           CONFIG_TMPFS_POSIX_ACL=y
           CONFIG_KALLSYMS=y
           CONFIG_KALLSYMS_ALL=y
-          # eBPF/BTF support (Issue #176)
-          CONFIG_BTF=y
+          # eBPF support (Issue #176) — BTF only on 6.1+ (old build system lacks toolchain)
           CONFIG_BPF_EVENTS=y
+          CONFIG_KPROBE_EVENTS=y
+          CONFIG_UPROBES=y
+          CONFIG_UPROBE_EVENTS=y
           CONFIG_FUSE_BPF=y
           

@@ -26,18 +26,15 @@ runs:
           rm -f drivers/misc/ntsync.c
         fi
 
-        #if [[ ( ${{ inputs.version }} == "android12-5.10" && "${{ inputs.sublevel }}" -le "208" ) || ( ${{ inputs.version }} = "android13-5.10" && "${{ inputs.sublevel }}" -le "210" ) ]]; then
-        #  patch -p1 -N < ${{ github.action_path }}/patches/0001-lockdep-mark-local_lock_t.patch
-        #fi
-
-        #if [[ ( ${{ inputs.version }} == "android12-5.10" && "${{ inputs.sublevel }}" -le "208" ) || ( ${{ inputs.version }} = "android13-5.10" && "${{ inputs.sublevel }}" -le "210" ) ]]; then
-        #  patch -p1 -N < ${{ github.action_path }}/patches/0002-lockdep-fix-init-map-confusion.patch
-        #fi
-
-        if [[ ( ${{ inputs.version }} == "android12-5.10" && "${{ inputs.sublevel }}" -le "208" ) || ( ${{ inputs.version }} = "android13-5.10" && "${{ inputs.sublevel }}" -le "210" ) ]]; then
-          patch -p1 -N < ${{ github.action_path }}/patches/0003-lockdep-assert-none-held.patch
+        # Apply lockdep prerequisites for android12-5.10 (2022-01 baseline)
+        if [[ ${{ inputs.version }} == "android12-5.10" && "${{ inputs.sublevel }}" -le "66" ]]; then
+          patch -p1 -N < ${{ github.action_path }}/patches/0001-lockdep-detect-recursive-read.patch
         fi
-        
+
+        if [[ ( "${{ inputs.version }}" == "android12-5.10" && "${{ inputs.sublevel }}" -le "209" ) || ( "${{ inputs.version }}" == "android13-5.10" && "${{ inputs.sublevel }}" -le "210" ) ]]; then
+          patch -p1 -N < ${{ github.action_path }}/patches/0002-lockdep-assert-none-held.patch
+        fi
+
         if [[ ${{ inputs.version }} = "android13-5.10" ]]; then
           patch -p1 < ${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_compat_android12-5.10.patch
         elif [[ ${{ inputs.version }} = "android14-5.15" ]]; then
@@ -53,4 +50,4 @@ runs:
       with:
         config_list: |
           CONFIG_NTSYNC=y
-   
+  

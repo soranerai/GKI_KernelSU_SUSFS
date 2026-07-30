@@ -34,9 +34,11 @@ runs:
         fi
         if [ "${{ inputs.sublevel }}" -le "117" ]; then
           echo "Applying fdinfo.c Android 12 5.10 Fake Patch"
-          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -0777 -i -pe 's{(if \(inode\) \{\n)\t\t/\*\n(\t\t \*[^\n]*\n)+\t\t \*/\n}{$1}g; s{^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;\n}{}m' fs/notify/fdinfo.c
           perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
           perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+          echo "Adding inotify_mark_user_mask function definition"
+          python3 -c 'import re;c=open("fs/notify/fdinfo.c").read();c=re.sub(r"^static void inotify_fdinfo\(struct seq_file \*m, struct fsnotify_mark \*mark\)$",lambda m:"static inline u32 inotify_mark_user_mask(struct fsnotify_mark *mark)\n{\n\treturn mark->mask & IN_ALL_EVENTS;\n}\n\n"+m.group(0),c,count=1,flags=re.MULTILINE);open("fs/notify/fdinfo.c","w").write(c)'
         fi
 
     - name: Apply Android 13 5.10 Fake Patches
@@ -47,9 +49,11 @@ runs:
         echo "Applying Android 13 5.10 SUSFS fixes"
         if [ "${{ inputs.sublevel }}" -le "107" ]; then
           echo "Applying fdinfo.c Android 13 5.10 Fake Patch"
-          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -0777 -i -pe 's{(if \(inode\) \{\n)\t\t/\*\n(\t\t \*[^\n]*\n)+\t\t \*/\n}{$1}g; s{^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;\n}{}m' fs/notify/fdinfo.c
           perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
           perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+          echo "Adding inotify_mark_user_mask function definition"
+          python3 -c 'import re;c=open("fs/notify/fdinfo.c").read();c=re.sub(r"^static void inotify_fdinfo\(struct seq_file \*m, struct fsnotify_mark \*mark\)$",lambda m:"static inline u32 inotify_mark_user_mask(struct fsnotify_mark *mark)\n{\n\treturn mark->mask & IN_ALL_EVENTS;\n}\n\n"+m.group(0),c,count=1,flags=re.MULTILINE);open("fs/notify/fdinfo.c","w").write(c)'
         fi
 
     - name: Apply Android 13 5.15 Fake Patches
@@ -64,9 +68,11 @@ runs:
           echo "Applying open.c Android 13 5.15 Fake Patch"
           sed -i '/^#include <linux\/compat.h>$/a #include <linux/mnt_idmapping.h>' fs/open.c
           echo "Applying fdinfo.c Android 13 5.15 Fake Patch"
-          sed -i '/^[[:space:]]*\/\*$\|^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;$/d' fs/notify/fdinfo.c
+          perl -0777 -i -pe 's{(if \(inode\) \{\n)\t\t/\*\n(\t\t \*[^\n]*\n)+\t\t \*/\n}{$1}g; s{^[[:space:]]*u32 mask = mark->mask & IN_ALL_EVENTS;\n}{}m' fs/notify/fdinfo.c
           perl -i -pe 's/\bmask,\s*mark->ignored_mask/inotify_mark_user_mask(mark)/g' fs/notify/fdinfo.c
           perl -i -pe 's/ignored_mask:%x/ignored_mask:0/g' fs/notify/fdinfo.c
+          echo "Adding inotify_mark_user_mask function definition"
+          python3 -c 'import re;c=open("fs/notify/fdinfo.c").read();c=re.sub(r"^static void inotify_fdinfo\(struct seq_file \*m, struct fsnotify_mark \*mark\)$",lambda m:"static inline u32 inotify_mark_user_mask(struct fsnotify_mark *mark)\n{\n\treturn mark->mask & IN_ALL_EVENTS;\n}\n\n"+m.group(0),c,count=1,flags=re.MULTILINE);open("fs/notify/fdinfo.c","w").write(c)'
         fi
         if [ "${{ inputs.sublevel }}" -ge "197" ]; then
           echo "Applying namespace.c Android 13 5.15 Fake Patch"
@@ -103,27 +109,11 @@ runs:
         echo "Applying 6.6 SUSFS fixes"
         if [ "${{ inputs.sublevel }}" -le "30" ]; then
           echo "Applying taskmmu.c Android 15 6.6 Fake Patch"
-          sed -i '/smap_gather_stats(vma, &mss, last_vma_end);/a\last_vma_end = vma->vm_end;' fs/proc/task_mmu.c
-          perl -0777 -i -pe '
-          @l = split /\n/;
-          for ($i = $#l; $i >= 0; $i--) {
-              if ($l[$i] =~ /last_vma_end = vma->vm_end;/) {
-                  $l[$i] = "\t\t\t\t" . $l[$i];
-                  splice(@l, $i + 1, 0, "\t\t\t}");
-
-                  # add { to the if line above
-                  for ($j = $i; $j >= 0; $j--) {
-                      if ($l[$j] =~ /if\s*\(vma->vm_end > last_vma_end\)/) {
-                          $l[$j] =~ s/\)\s*\$/) {/;
-                          last;
-                      }
-                  }
-
-                  last;
-              }
-          }
-          $_ = join "\n", @l
-          ' fs/proc/task_mmu.c
+          python3 -c 'import re;c=open("fs/proc/task_mmu.c").read();c=re.sub(r"(\t+\t\tif\s*\(\s*vma->vm_end\s*>\s*last_vma_end\s*\))\n(\t+\t\t\tsmap_gather_stats\(vma,\s*&mss,\s*last_vma_end\);)\n(\t+)\}",lambda m:m.group(1)+" {\n"+m.group(2)+"\n"+m.group(3)+"\t\tlast_vma_end = vma->vm_end;\n"+m.group(3)+"\t}\n"+m.group(3)+"}",c,count=1);open("fs/proc/task_mmu.c","w").write(c)'
+        fi
+        if [ "${{ inputs.sublevel }}" -le "30" ] && [ "${{ inputs.os_patch_level }}" = "2024-07" ]; then
+          echo "Adding __fold_filemap_fixup_entry stub for 2024-07 kernels"
+          sed -i '/^#include <asm\/elf.h>$/i #ifndef __fold_filemap_fixup_entry\nstatic inline void __fold_filemap_fixup_entry(struct vma_iterator *iter, unsigned long *end) { }\n#endif /* __fold_filemap_fixup_entry */\n' fs/proc/task_mmu.c
         fi
         if [ "${{ inputs.sublevel }}" -le "92" ]; then
           echo "Applying base.c Android 15 6.6 Fake Patch"
@@ -171,4 +161,13 @@ runs:
         if grep -q '__fold_filemap_fixup_entry' fs/proc/task_mmu.c && ! grep -q '#include <linux/page_size_compat.h>' fs/proc/task_mmu.c; then
           sed -i '/#include <linux\/pkeys.h>/a #include <linux/page_size_compat.h>' fs/proc/task_mmu.c
           echo "Added page_size_compat.h include to fs/proc/task_mmu.c"
+        fi
+        # Fix set_nameidata() calls for 5.10 kernels.
+        # The SUSFS patch adds set_nameidata(nd, old_dfd, fake_filename, NULL) with 4 args,
+        # but 5.10 kernels only have 3-param set_nameidata(p, dfd, name) — no root param.
+        if [[ "${{ inputs.version }}" == "android12-5.10" || "${{ inputs.version }}" == "android13-5.10" ]]; then
+          if grep -q 'set_nameidata(nd, old_dfd, fake_filename, NULL)' fs/namei.c; then
+            echo "Fixing set_nameidata calls for 5.10 (4-arg -> 3-arg)"
+            sed -i 's/set_nameidata(nd, old_dfd, fake_filename, NULL)/set_nameidata(nd, old_dfd, fake_filename)/g' fs/namei.c
+          fi
         fi
