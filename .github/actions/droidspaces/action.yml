@@ -21,10 +21,13 @@ runs:
   using: composite
   steps:
     - name: Download and Apply Droidspaces-OSS Patches
-      shell: bash
-      working-directory: ${{ github.workspace }}
-      run: |
-        git clone --depth=1 https://github.com/ravindu644/Droidspaces-OSS.git
+      uses: ./.github/actions/retry
+      with:
+        command: |
+          git clone --depth=1 https://github.com/ravindu644/Droidspaces-OSS.git
+        attempts: 5
+        delay: 5
+        workdir: ${{ github.workspace }}
 
     - name: Apply the SYSVIPC kABI fix
       shell: bash

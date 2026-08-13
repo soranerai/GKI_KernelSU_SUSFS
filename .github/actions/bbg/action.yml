@@ -5,10 +5,13 @@ runs:
   using: composite
   steps:
     - name: Install Baseband Guard
-      shell: bash
-      working-directory: ${{ github.workspace }}/kernel
-      run: |
-        wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
+      uses: ./.github/actions/retry
+      with:
+        command: |
+          wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
+        attempts: 5
+        delay: 5
+        workdir: ${{ github.workspace }}/kernel
     
     - name: Configure Baseband Guard
       shell: bash

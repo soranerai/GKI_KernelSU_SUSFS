@@ -30,20 +30,20 @@ jobs:
 
           gitlab_latest_commit() {
             local branch="$1"
-            curl -fsSL "https://gitlab.com/api/v4/projects/simonpunk%2Fsusfs4ksu/repository/commits?ref_name=${branch}&per_page=1" | jq -r '.[0].id'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://gitlab.com/api/v4/projects/simonpunk%2Fsusfs4ksu/repository/commits?ref_name=${branch}&per_page=1" | jq -r '.[0].id'
           }
 
           gitlab_latest_message() {
             local branch="$1"
-            curl -fsSL "https://gitlab.com/api/v4/projects/simonpunk%2Fsusfs4ksu/repository/commits?ref_name=${branch}&per_page=1" | jq -r '.[0].message | split("\n")[0]'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://gitlab.com/api/v4/projects/simonpunk%2Fsusfs4ksu/repository/commits?ref_name=${branch}&per_page=1" | jq -r '.[0].message | split("\n")[0]'
           }
 
           github_latest_commit() {
-            curl -fsSL "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.sha'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.sha'
           }
 
           github_latest_message() {
-            curl -fsSL "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.commit.message | split("\n")[0]'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.commit.message | split("\n")[0]'
           }
 
           {
