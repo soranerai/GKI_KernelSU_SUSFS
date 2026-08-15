@@ -165,6 +165,11 @@ jobs:
         token: ${{ secrets.VPNHIDE_PRIVATE_TOKEN }}
         version: ${{ inputs.version }}
 
+    - name: Setup NoMount
+      uses: ./.github/actions/nomount
+      with:
+        kernel_version: ${{ inputs.kernel_version }}
+
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
       uses: ./.github/actions/bbg
