@@ -171,6 +171,7 @@ jobs:
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
+        enable_susfs: ${{ inputs.enable_susfs }}
 
     - name: SUSFS
       if: inputs.enable_susfs
@@ -182,6 +183,16 @@ jobs:
         kernel_version: ${{ inputs.kernel_version }}
         os_patch_level: ${{ inputs.os_patch_level }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
+
+    - name: Verify SUSFS headers
+      if: inputs.enable_susfs
+      shell: bash
+      run: |
+        set -euo pipefail
+        test -f "${{ github.workspace }}/kernel/common/include/linux/susfs.h" || {
+          echo "SUSFS is enabled, but include/linux/susfs.h was not installed" >&2
+          exit 1
+        }
 
     - name: Setup VPNHide
       if: inputs.enable_vpnhide
