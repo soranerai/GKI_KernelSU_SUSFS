@@ -24,9 +24,34 @@ on:
       variant:
         required: false
         type: string
-      feature_set:
-        required: true
-        type: string
+      enable_kernelsu:
+        required: false
+        type: boolean
+        default: true
+      enable_susfs:
+        required: false
+        type: boolean
+        default: true
+      enable_vpnhide:
+        required: false
+        type: boolean
+        default: true
+      enable_nomount:
+        required: false
+        type: boolean
+        default: true
+      enable_bbg:
+        required: false
+        type: boolean
+        default: true
+      enable_networking:
+        required: false
+        type: boolean
+        default: true
+      enable_droidspaces:
+        required: false
+        type: boolean
+        default: true
       ksu_branch:
         required: false
         type: string
@@ -142,13 +167,13 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
 
     - name: Setup KernelSU-Next
-      if: contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL'
+      if: inputs.enable_kernelsu
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
 
     - name: SUSFS
-      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      if: inputs.enable_susfs
       uses: ./.github/actions/susfs
       with:
         susfs_commit: ${{ inputs.susfs_commit }}
@@ -159,23 +184,24 @@ jobs:
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
     - name: Setup VPNHide
-      if: contains(inputs.feature_set, 'VPNHIDE') || inputs.feature_set == 'FULL'
+      if: inputs.enable_vpnhide
       uses: ./.github/actions/vpnhide
       with:
         token: ${{ secrets.VPNHIDE_PRIVATE_TOKEN }}
         version: ${{ inputs.version }}
 
     - name: Setup NoMount
+      if: inputs.enable_nomount
       uses: ./.github/actions/nomount
       with:
         kernel_version: ${{ inputs.kernel_version }}
 
     - name: Baseband Guard
-      if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
+      if: inputs.enable_bbg
       uses: ./.github/actions/bbg
 
     - name: Setup Networking
-      if: contains(inputs.feature_set, 'NET') || inputs.feature_set == 'FULL'
+      if: inputs.enable_networking
       uses: ./.github/actions/networking
       with:
         version: ${{ inputs.version }}
@@ -184,7 +210,7 @@ jobs:
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
     - name: DroidSpaces-OSS Patches
-      if: contains(inputs.feature_set, 'DS') || inputs.feature_set == 'FULL'
+      if: inputs.enable_droidspaces
       uses: ./.github/actions/droidspaces
       with:
         version: ${{ inputs.version }}
@@ -454,7 +480,7 @@ jobs:
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
-          echo "| **Feature Set** | ${{ inputs.feature_set }} |"
+          echo "| **Features** | KSUN=${{ inputs.enable_kernelsu }}, SUSFS=${{ inputs.enable_susfs }}, VPNHide=${{ inputs.enable_vpnhide }}, NoMount=${{ inputs.enable_nomount }}, BBG=${{ inputs.enable_bbg }}, NET=${{ inputs.enable_networking }}, DS=${{ inputs.enable_droidspaces }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
           echo
           

@@ -29,24 +29,34 @@ on:
           - android16-6.12
           - android17-6.18
         default: All
-      feature_set:
-        description: "Feature Set"
-        type: choice
-        options:
-          - KSUN+SUSFS+VPNHIDE+NET
-          - KSUN+SUSFS+VPNHIDE
-          - KSUN+SUSFS+BBG+NET+DS
-          - KSUN+SUSFS+BBG
-          - KSUN+SUSFS+NET
-          - KSUN+SUSFS+DS
-          - KSUN+SUSFS
-          - KSUN+BBG
-          - KSUN+NET
-          - KSUN+DS
-          - KSUN
-          - NONE
-          - FULL
-        default: FULL
+      enable_kernelsu:
+        description: "Enable KernelSU-Next"
+        type: boolean
+        default: true
+      enable_susfs:
+        description: "Enable SUSFS"
+        type: boolean
+        default: true
+      enable_vpnhide:
+        description: "Enable VPNHide"
+        type: boolean
+        default: true
+      enable_nomount:
+        description: "Enable NoMount"
+        type: boolean
+        default: true
+      enable_bbg:
+        description: "Enable Baseband Guard"
+        type: boolean
+        default: true
+      enable_networking:
+        description: "Enable networking features"
+        type: boolean
+        default: true
+      enable_droidspaces:
+        description: "Enable DroidSpaces-OSS"
+        type: boolean
+        default: true
       ksu_branch:
         description: "KernelSU branch or commit (empty = latest dev-susfs branch tip)"
         type: string
@@ -139,7 +149,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android12-5.10.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -151,7 +167,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.10.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -163,7 +185,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.15.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -175,7 +203,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-5.15.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -187,7 +221,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-6.1.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -199,7 +239,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android15-6.6.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -211,7 +257,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android16-6.12.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -223,7 +275,13 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android17-6.18.json
-      feature_set: ${{ inputs.feature_set || 'FULL' }}
+      enable_kernelsu: ${{ inputs.enable_kernelsu }}
+      enable_susfs: ${{ inputs.enable_susfs }}
+      enable_vpnhide: ${{ inputs.enable_vpnhide }}
+      enable_nomount: ${{ inputs.enable_nomount }}
+      enable_bbg: ${{ inputs.enable_bbg }}
+      enable_networking: ${{ inputs.enable_networking }}
+      enable_droidspaces: ${{ inputs.enable_droidspaces }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android17-6-18 }}
       target_os_patch_level: ${{ inputs.target_os_patch_level }}
@@ -345,7 +403,7 @@ jobs:
         {
           echo "# 📋 Build Summary — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo
-          echo "**Feature Set:** ${{ inputs.feature_set }}"
+          echo "**Features:** KSUN=${{ inputs.enable_kernelsu }}, SUSFS=${{ inputs.enable_susfs }}, VPNHide=${{ inputs.enable_vpnhide }}, NoMount=${{ inputs.enable_nomount }}, BBG=${{ inputs.enable_bbg }}, NET=${{ inputs.enable_networking }}, DS=${{ inputs.enable_droidspaces }}"
           echo "**KSU Branch:** ${{ inputs.ksu_branch || 'latest dev' }}"
           echo
           
