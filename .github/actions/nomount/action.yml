@@ -35,13 +35,16 @@ runs:
         rm -rf "$NOMOUNT_DIR"
         git clone --depth=1 --branch "$NOMOUNT_BRANCH" "$NOMOUNT_REPO" "$NOMOUNT_DIR"
         test -f "$NOMOUNT_DIR/kernel/patches/$NOMOUNT_PATCH"
+        test -f "$NOMOUNT_DIR/kernel/src/Kconfig"
+        test -f "$NOMOUNT_DIR/kernel/src/Makefile"
         test -f "$NOMOUNT_DIR/kernel/src/nomount.c"
         test -f "$NOMOUNT_DIR/kernel/src/nomount.h"
 
-        cp "$NOMOUNT_DIR/kernel/src/nomount.c" "$KERNEL_DIR/fs/nomount.c"
-        cp "$NOMOUNT_DIR/kernel/src/nomount.h" "$KERNEL_DIR/fs/nomount.h"
+        mkdir -p "$KERNEL_DIR/fs/nomount"
+        cp -a "$NOMOUNT_DIR/kernel/src/." "$KERNEL_DIR/fs/nomount/"
         cd "$KERNEL_DIR"
         patch --forward --batch -p1 < "$NOMOUNT_DIR/kernel/patches/$NOMOUNT_PATCH"
+        test -f "$KERNEL_DIR/fs/nomount/Kconfig"
         echo "NoMount integrated: $KERNEL_VERSION ($NOMOUNT_PATCH, branch $NOMOUNT_BRANCH)"
 
     - name: Enable NoMount in kernel defconfig
