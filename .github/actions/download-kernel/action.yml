@@ -138,6 +138,9 @@ runs:
 
         COMMIT_DATE=$(git log -1 --format=%cI)
         COMMIT_MSG=$(git log -1 --format=%s)
+        COMMIT_EPOCH=$(git log -1 --format=%ct)
 
         echo "Kernel common commit date: $COMMIT_DATE"
         echo "Kernel common commit msg: $COMMIT_MSG"
+        echo "Kernel common commit epoch: $COMMIT_EPOCH"
+        echo "KERNEL_COMMIT_EPOCH=$COMMIT_EPOCH" >> "$GITHUB_ENV"
