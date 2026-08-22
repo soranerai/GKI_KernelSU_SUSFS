@@ -189,7 +189,6 @@ jobs:
       if: inputs.enable_vpnhide
       uses: ./.github/actions/vpnhide
       with:
-        token: ${{ secrets.VPNHIDE_PRIVATE_TOKEN }}
         version: ${{ inputs.version }}
 
     - name: Setup NoMount
