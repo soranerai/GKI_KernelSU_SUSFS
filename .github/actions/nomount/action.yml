@@ -1,51 +1,26 @@
 name: 'Setup NoMount'
 description: 'Integrate NoMount VFS hooks and enable CONFIG_NOMOUNT'
 
-inputs:
-  kernel_version:
-    description: 'Kernel major/minor version'
-    required: true
-
 runs:
   using: composite
   steps:
-    - name: Fetch and integrate NoMount
+    - name: Integrate NoMount
       shell: bash
-      env:
-        KERNEL_VERSION: ${{ inputs.kernel_version }}
       run: |
         set -euo pipefail
 
         KERNEL_DIR="${{ github.workspace }}/kernel/common"
-        NOMOUNT_DIR="${{ github.workspace }}/nomount"
-        NOMOUNT_REPO="https://github.com/maxsteeel/nomount.git"
-        NOMOUNT_BRANCH="dev"
-
-        case "$KERNEL_VERSION" in
-          5.10|5.15|6.1|6.6|6.12|6.18)
-            NOMOUNT_PATCH="nomount_${KERNEL_VERSION}_kernel_integration.patch"
-            ;;
-          *)
-            echo "Unsupported kernel version for NoMount: $KERNEL_VERSION" >&2
-            exit 1
-            ;;
-        esac
 
         test -d "$KERNEL_DIR"
-        rm -rf "$NOMOUNT_DIR"
-        git clone --depth=1 --branch "$NOMOUNT_BRANCH" "$NOMOUNT_REPO" "$NOMOUNT_DIR"
-        test -f "$NOMOUNT_DIR/kernel/patches/$NOMOUNT_PATCH"
-        test -f "$NOMOUNT_DIR/kernel/src/Kconfig"
-        test -f "$NOMOUNT_DIR/kernel/src/Makefile"
-        test -f "$NOMOUNT_DIR/kernel/src/nomount.c"
-        test -f "$NOMOUNT_DIR/kernel/src/nomount.h"
-
-        mkdir -p "$KERNEL_DIR/fs/nomount"
-        cp -a "$NOMOUNT_DIR/kernel/src/." "$KERNEL_DIR/fs/nomount/"
         cd "$KERNEL_DIR"
-        patch --forward --batch -p1 < "$NOMOUNT_DIR/kernel/patches/$NOMOUNT_PATCH"
+        curl --fail --location --silent --show-error \
+          https://raw.githubusercontent.com/maxsteeel/nomount/dev/kernel/setup.sh \
+          | bash -s dev
+        test -L "$KERNEL_DIR/fs/nomount"
         test -f "$KERNEL_DIR/fs/nomount/Kconfig"
-        echo "NoMount integrated: $KERNEL_VERSION ($NOMOUNT_PATCH, branch $NOMOUNT_BRANCH)"
+        grep -qxF 'obj-$(CONFIG_NOMOUNT) += nomount/' "$KERNEL_DIR/fs/Makefile"
+        grep -qxF 'source "fs/nomount/Kconfig"' "$KERNEL_DIR/fs/Kconfig"
+        echo "NoMount integrated using upstream setup.sh (branch dev)"
 
     - name: Enable NoMount in kernel defconfig
       uses: ./.github/actions/set-kernel-config

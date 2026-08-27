@@ -207,8 +207,6 @@ jobs:
     - name: Setup NoMount
       if: inputs.enable_nomount
       uses: ./.github/actions/nomount
-      with:
-        kernel_version: ${{ inputs.kernel_version }}
 
     - name: Baseband Guard
       if: inputs.enable_bbg
