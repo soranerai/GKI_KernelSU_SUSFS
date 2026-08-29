@@ -49,6 +49,10 @@ runs:
           BPF_CC="aarch64-linux-android34-clang"
         elif command -v aarch64-linux-gnu-clang &>/dev/null; then
           BPF_CC="aarch64-linux-gnu-clang"
+        elif command -v clang &>/dev/null; then
+          # The BPF target is architecture-independent; Ubuntu's clang can
+          # compile it directly with the -target bpf flag below.
+          BPF_CC="clang"
         else
           echo "ERROR: No suitable BPF compiler found"
           exit 1
@@ -91,6 +95,8 @@ runs:
           CC="aarch64-linux-android34-clang"
         elif command -v aarch64-linux-gnu-clang &>/dev/null; then
           CC="aarch64-linux-gnu-clang"
+        elif command -v clang &>/dev/null; then
+          CC="clang"
         else
           echo "ERROR: No suitable compiler found for arm64"
           exit 1

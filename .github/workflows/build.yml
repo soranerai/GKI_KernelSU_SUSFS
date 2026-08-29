@@ -126,7 +126,9 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
 
     - name: Build FUSE-BPF Userspace Daemon (Issue #211)
-      if: ${{ inputs.os_patch_level == 'lts' && (inputs.version == 'android16-6.12' || inputs.version == 'android17-6.18') }}
+      # This is an optional test artifact, not a kernel build prerequisite.
+      # Keep it disabled until its standalone cross-compilation is reliable.
+      if: false
       uses: ./.github/actions/fuse-bpf
       with:
         version: ${{ inputs.version }}
