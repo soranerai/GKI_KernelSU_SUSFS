@@ -103,7 +103,7 @@ on:
         required: false
         default: ""
       susfs_commit_android17-6-18:
-        description: "SUSFS commit for android17-6.18 (empty = latest branch tip)"
+        description: "SUSFS commit for android17-6.18 (empty = latest android16-6.12 compatibility branch tip)"
         type: string
         required: false
         default: ""
