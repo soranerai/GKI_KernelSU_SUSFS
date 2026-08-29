@@ -21,12 +21,7 @@ runs:
         # Apply base SUSFS patches
         cp "${{ github.workspace }}/susfs4ksu/kernel_patches/fs/"* "${{ github.workspace }}/kernel/common/fs/"
         cp "${{ github.workspace }}/susfs4ksu/kernel_patches/include/linux/"* "${{ github.workspace }}/kernel/common/include/linux/"
-        SUSFS_PATCH_VERSION="${{ inputs.version }}"
-        if [ "$SUSFS_PATCH_VERSION" = "android17-6.18" ]; then
-          SUSFS_PATCH_VERSION="android16-6.12"
-          echo "Using the Android 16 / 6.12 SUSFS patch for the Android 17 / 6.18 compatibility test"
-        fi
-        cp "${{ github.workspace }}/susfs4ksu/kernel_patches/50_add_susfs_in_gki-${SUSFS_PATCH_VERSION}.patch" ./
+        cp "${{ github.workspace }}/susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.version }}.patch" ./
 
     - name: Apply Android 12 5.10 Fake Patches
       shell: bash
@@ -148,9 +143,7 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}/kernel/common
       run: |
-        SUSFS_PATCH_VERSION="${{ inputs.version }}"
-        [ "$SUSFS_PATCH_VERSION" = "android17-6.18" ] && SUSFS_PATCH_VERSION="android16-6.12"
-        patch -p1 < "50_add_susfs_in_gki-${SUSFS_PATCH_VERSION}.patch"
+        patch -p1 < "50_add_susfs_in_gki-${{ inputs.version }}.patch"
 
         # SUSFS v2.2.0's 6.12 patch still passes the removed third argument
         # to getname_flags(). Android 16 / Linux 6.12 exposes the modern
