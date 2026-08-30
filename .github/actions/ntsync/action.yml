@@ -20,13 +20,7 @@ runs:
       run: |
         set -euo pipefail
 
-        COMPAT_VERSION="${{ inputs.version }}"
-        if [[ "$COMPAT_VERSION" = "android17-6.18" ]]; then
-          COMPAT_VERSION="android16-6.12"
-          echo "Using Android 16 / 6.12 NTSync compatibility patch for Android 17 / 6.18"
-        fi
-
-        if [[ "$COMPAT_VERSION" = "android16-6.12" ]]; then
+        if [[ "${{ inputs.version }}" = "android16-6.12" || "${{ inputs.version }}" = "android17-6.18" ]]; then
           echo "Removing pre-existing ntsync files for ${{ inputs.version }}"
           rm -f include/uapi/linux/ntsync.h
           rm -f drivers/misc/ntsync.c
@@ -41,12 +35,22 @@ runs:
           patch -p1 -N < ${{ github.action_path }}/patches/0002-lockdep-assert-none-held.patch
         fi
 
-        if [[ ${{ inputs.version }} = "android13-5.10" ]]; then
+        if [[ "${{ inputs.version }}" = "android17-6.18" ]]; then
+          # Android 17 / 6.18 already removed the 6.12 patch's
+          # `depends on BROKEN` line, so that patch cannot apply. Keep the
+          # intended behaviour by adding the default directly and only once.
+          if sed -n '/^config NTSYNC$/,/^[[:space:]]*help$/p' drivers/misc/Kconfig | grep -q '^[[:space:]]*default[[:space:]]'; then
+            echo "NTSYNC already has a default; skipping Kconfig adjustment"
+          else
+            python3 -c 'from pathlib import Path; import re; path=Path("drivers/misc/Kconfig"); text=path.read_text(); pattern=r"(^config NTSYNC\n(?:(?!^[[:space:]]*help[[:space:]]*$).*\n)*)(^[[:space:]]*help[[:space:]]*$)"; text, count=re.subn(pattern, r"\1\tdefault m\n\2", text, count=1, flags=re.MULTILINE); assert count == 1, "NTSYNC Kconfig block not found"; path.write_text(text)'
+            echo "Added default m to the Android 17 / 6.18 NTSYNC Kconfig block"
+          fi
+        elif [[ ${{ inputs.version }} = "android13-5.10" ]]; then
           patch -p1 < ${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_compat_android12-5.10.patch
         elif [[ ${{ inputs.version }} = "android14-5.15" ]]; then
           patch -p1 < ${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_compat_android13-5.15.patch
         else
-          patch -p1 < "${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_compat_${COMPAT_VERSION}.patch"
+          patch -p1 < "${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_compat_${{ inputs.version }}.patch"
         fi
 
         patch -p1 < ${{ github.workspace }}/kernel_patches/common/ntsync/ntsync_base.patch
