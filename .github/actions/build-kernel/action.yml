@@ -63,11 +63,17 @@ runs:
           sed -i '/check_defconfig =/d' common/BUILD.bazel
           sed -i '/name = "kernel_aarch64",/a\    check_defconfig = "disabled",' common/BUILD.bazel
         fi
+        BAZEL_TARGET="//common:kernel_aarch64/Image"
+        if [ "${{ inputs.version }}" = "android17-6.18" ]; then
+          # Android 17 / Linux 6.18 exposes the generated images through a
+          # filegroup rather than the legacy kernel_aarch64/Image target.
+          BAZEL_TARGET="//common:kernel_aarch64_images"
+        fi
         tools/bazel build \
           --config=fast \
           --config=stamp \
           --disk_cache=/home/runner/.cache/bazel \
-          //common:kernel_aarch64/Image
+          "$BAZEL_TARGET"
       fi
 
   - name: 'Gather Build Artifacts'
@@ -75,15 +81,28 @@ runs:
     working-directory: ${{ github.workspace }}/kernel
     run: |
       set -euo pipefail
-      if [ -f "bazel-bin/common/kernel_aarch64/Image" ]; then
-        echo "Found Image at bazel-bin/common/kernel_aarch64/Image"
+      IMAGE_PATH=""
+      for candidate in \
+        "bazel-bin/common/kernel_aarch64/Image" \
+        "bazel-bin/common/kernel_aarch64_images/Image"; do
+        if [ -f "$candidate" ]; then
+          IMAGE_PATH="$candidate"
+          break
+        fi
+      done
+      if [ -z "$IMAGE_PATH" ] && [ -d "bazel-bin/common" ]; then
+        IMAGE_PATH="$(find -L bazel-bin/common -type f -name Image -print -quit)"
+      fi
+
+      if [ -n "$IMAGE_PATH" ]; then
+        echo "Found Image at $IMAGE_PATH"
         if [[ ${{ inputs.bypass }} == "true" ]]; then
-          cp "bazel-bin/common/kernel_aarch64/Image" "${{ github.workspace }}/AnyKernel3/Bypass-Image"
+          cp "$IMAGE_PATH" "${{ github.workspace }}/AnyKernel3/Bypass-Image"
         else
-          cp "bazel-bin/common/kernel_aarch64/Image" "${{ github.workspace }}/AnyKernel3/Image"
+          cp "$IMAGE_PATH" "${{ github.workspace }}/AnyKernel3/Image"
         fi
         exit 0
-        fi
+      fi
       if [ -f "/home/runner/out/dist/Image" ]; then
         echo "Found Image at /home/runner/out/dist/Image"
         if [[ ${{ inputs.bypass }} == "true" ]]; then
