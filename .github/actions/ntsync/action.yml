@@ -42,7 +42,7 @@ runs:
           if sed -n '/^config NTSYNC$/,/^[[:space:]]*help$/p' drivers/misc/Kconfig | grep -q '^[[:space:]]*default[[:space:]]'; then
             echo "NTSYNC already has a default; skipping Kconfig adjustment"
           else
-            python3 -c 'from pathlib import Path; import re; path=Path("drivers/misc/Kconfig"); text=path.read_text(); pattern=r"(^config NTSYNC\n(?:(?!^[[:space:]]*help[[:space:]]*$).*\n)*)(^[[:space:]]*help[[:space:]]*$)"; text, count=re.subn(pattern, r"\1\tdefault m\n\2", text, count=1, flags=re.MULTILINE); assert count == 1, "NTSYNC Kconfig block not found"; path.write_text(text)'
+            python3 -c 'from pathlib import Path; path=Path("drivers/misc/Kconfig"); lines=path.read_text().splitlines(keepends=True); start=next(i for i,line in enumerate(lines) if line.rstrip("\n") == "config NTSYNC"); help_line=next(i for i in range(start + 1, len(lines)) if lines[i].strip() == "help"); lines.insert(help_line, "\tdefault m\n"); path.write_text("".join(lines))'
             echo "Added default m to the Android 17 / 6.18 NTSYNC Kconfig block"
           fi
         elif [[ ${{ inputs.version }} = "android13-5.10" ]]; then
