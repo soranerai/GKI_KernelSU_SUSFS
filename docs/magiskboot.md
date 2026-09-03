@@ -1,28 +1,21 @@
 # Patch boot.img Manually (magiskboot)
 
-For some devices, the `boot.img` format isn't as common as `lz4`, `gz`, and uncompressed. A typical example is the Pixel, where the `boot.img` is compressed in the `lz4_legacy` format, while the ramdisk may be in `gz` or also compressed in `lz4_legacy`. Currently, if you directly flash the `boot.img` provided by KernelSU, the device may not be able to boot. In this case, you can manually patch the `boot.img`.
+Use the [official magiskboot build](https://github.com/topjohnwu/Magisk/releases) — works on Android and Linux.
 
-> [!CAUTION]
-> Flashing a kernel can brick your device and will void your warranty. Make a full backup (boot partition at minimum) before proceeding.
+See [Installation](installation.md) for prerequisites, supported versions, and risks.
 
-> [!TIP]
-> It's always recommended to use `magiskboot` to patch images. There are two ways:
-> - [magiskboot (official)](https://github.com/topjohnwu/Magisk/releases) - runs on Android devices (and Linux)
-> - [WildKernels/Magisk (W.I.P.)](https://github.com/WildKernels/Magisk) - cross-built binaries for Windows/macOS/Linux PCs (W.I.P.)
->
-
-**Platforms:** [Android](#using-magiskboot-on-android-devices) · [Linux](#using-magiskboot-on-linux) · [Windows / Other](#using-magiskboot-on-windows--other)
+**Platforms:** [Android](#-android) · [Linux](#-linux)
 
 ## Preparation
 
 1. Get your device's stock `boot.img`.
-2. Download the AnyKernel3 ZIP file that matches your kernel version (e.g., `6.1.157-android14`).
-3. Unpack the AnyKernel3 package and get the `Image` file, which is the kernel file of KernelSU.
+2. Download the AnyKernel3 ZIP for your kernel version from [Releases](https://github.com/WildKernels/GKI_KernelSU_SUSFS/releases).
+3. Unpack the ZIP and get the `Image` file (the KernelSU kernel).
 
-> [!NOTE]
-> Match by the full kernel version (e.g., `6.1.157-android14`) - your device's Android version and the `android14` in the kernel version are not necessarily the same.
+---
 
-## Using magiskboot on Android devices
+<details>
+<summary><b> Android</b> — via adb + <code>libmagiskboot.so</code></summary>
 
 Folder structure on device (`/data/local/tmp/`):
 
@@ -34,41 +27,41 @@ Folder structure on device (`/data/local/tmp/`):
 ```
 
 1. Download latest Magisk from [GitHub Releases](https://github.com/topjohnwu/Magisk/releases).
-2. Rename `Magisk-*(version).apk` to `Magisk-*.zip` and unzip it.
-3. Push `libmagiskboot.so` to your device by ADB:
-   ```sh
-   adb push Magisk-*/lib/arm64-v8a/libmagiskboot.so /data/local/tmp/magiskboot
-   ```
-4. Push stock `boot.img` and `Image` from AnyKernel3 to your device:
-   ```sh
-   adb push boot.img /data/local/tmp/
-   adb push Image /data/local/tmp/
-   ```
-5. Enter ADB shell and make it executable:
-   ```sh
-   adb shell
-   cd /data/local/tmp/
-   chmod +x magiskboot
-   ```
-6. Unpack `boot.img`:
-   ```sh
-   ./magiskboot unpack boot.img
-   ```
-   You will get a `kernel` file - this is your stock kernel.
-7. Replace kernel with the KernelSU Image:
-   ```sh
-   mv -f Image kernel
-   ```
-8. Repack the boot image:
-   ```sh
-   ./magiskboot repack boot.img
-   ```
-   You will get a `new-boot.img` file. Flash this file to your device by fastboot:
-   ```sh
-   fastboot flash boot new-boot.img
-   ```
+2. Rename `Magisk-*(version).apk` to `Magisk-*.zip` and unzip.
+3. Push `libmagiskboot.so` to device:
+  ```sh
+  adb push Magisk-*/lib/arm64-v8a/libmagiskboot.so /data/local/tmp/magiskboot
+  ```
+4. Push `boot.img` and `Image`:
+  ```sh
+  adb push boot.img /data/local/tmp/
+  adb push Image /data/local/tmp/
+  ```
+5. Make executable:
+  ```sh
+  adb shell
+  cd /data/local/tmp/
+  chmod +x magiskboot
+  ```
+6. Unpack:
+  ```sh
+  ./magiskboot unpack boot.img
+  ```
+7. Replace kernel:
+  ```sh
+  mv -f Image kernel
+  ```
+8. Repack:
+  ```sh
+  ./magiskboot repack boot.img
+  ```
+9. Test: `fastboot boot new-boot.img`
+10. Flash: `fastboot flash boot new-boot.img`
 
-## Using magiskboot on Linux
+</details>
+
+<details>
+<summary><b> Linux</b> — official magiskboot</summary>
 
 Folder structure on PC:
 
@@ -79,66 +72,12 @@ Folder structure on PC:
 └── Image
 ```
 
-Official `magiskboot` can run in Linux normally - use the [official build](https://github.com/topjohnwu/Magisk/releases). If you prefer, you can also use [WildKernels/Magisk (W.I.P.)](https://github.com/WildKernels/Magisk).
+1. Prepare `boot.img` and `Image` on PC.
+2. Make executable: `chmod +x magiskboot`
+3. Unpack: `./magiskboot unpack boot.img`
+4. Replace: `mv -f Image kernel`
+5. Repack: `./magiskboot repack boot.img`
+6. Test: `fastboot boot new-boot.img`
+7. Flash: `fastboot flash boot new-boot.img`
 
-1. Prepare stock `boot.img` and `Image` in your PC.
-2. Make it executable:
-   ```sh
-   chmod +x magiskboot
-   ```
-3. Unpack `boot.img`:
-   ```sh
-   ./magiskboot unpack boot.img
-   ```
-   You will get a `kernel` file - this is your stock kernel.
-4. Replace kernel:
-   ```sh
-   mv -f Image kernel
-   ```
-5. Repack:
-   ```sh
-   ./magiskboot repack boot.img
-   ```
-   You will get a `new-boot.img` file. Flash it by fastboot:
-   ```sh
-   fastboot flash boot new-boot.img
-   ```
-
-## Using magiskboot on Windows / Other
-
-Folder structure on PC:
-
-```
-.
-├── magiskboot.exe
-├── boot.img
-└── Image
-```
-
-1. Download the corresponding `magiskboot` binary for your OS from [WildKernels/Magisk (W.I.P.)](https://github.com/WildKernels/Magisk).
-2. Prepare stock `boot.img` and `Image` in your PC.
-3. Make it executable:
-   ```sh
-   chmod +x magiskboot
-   ```
-4. Unpack `boot.img`:
-   ```sh
-   ./magiskboot unpack boot.img
-   ```
-   You will get a `kernel` file - this is your stock kernel.
-5. Replace kernel:
-   ```sh
-   mv -f Image kernel
-   ```
-6. Repack:
-   ```sh
-   ./magiskboot repack boot.img
-   ```
-   You will get a `new-boot.img` file. Flash it by fastboot:
-   ```sh
-   fastboot flash boot new-boot.img
-   ```
-
----
-
-Related: [Installation Overview](installation.md) · [Install with Kernel Flasher](kernelflasher.md) · [Releases](https://github.com/WildKernels/GKI_KernelSU_SUSFS/releases)
+</details>

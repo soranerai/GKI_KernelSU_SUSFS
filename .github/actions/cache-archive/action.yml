@@ -62,7 +62,7 @@ runs:
           echo "Creating release: $TAG_NAME"
           GIT_COMMITTER_DATE="2015-01-01T12:00:00" git tag -a "$TAG_NAME" -m "General Cache Storage"
           git push origin "$TAG_NAME" --force || true
-          gh release create "$TAG_NAME" --title "General Cache" --notes "Automated storage for build assets" --repo "$TARGET_REPO" || true
+          gh release create "$TAG_NAME" --title "General Cache" --notes "Automated storage for build assets" --prerelease --repo "$TARGET_REPO" || true
         fi
 
         # Check if path exists

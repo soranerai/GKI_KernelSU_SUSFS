@@ -58,11 +58,25 @@ runs:
         RETRY_DELAY_SHORT=15
         SYNC_TIMEOUT="15m"
         attempt=1
-        DEPTHS=(1 50 0)
+        # Always shallow: the build only needs the branch tip. Deeper retries
+        # just download more data into a strained runner (slower + more disk).
+        DEPTHS=(1 1 1)
+
+        clean_workspace() {
+          echo "Disk before cleanup:"
+          df -h "$PWD" | tail -n +2 || true
+          # Remove repo metadata AND any half-checked-out project dirs from the
+          # previous attempt. Deleting only .repo leaves stale checkouts behind
+          # and every later sync fails with "Checking out local projects failed".
+          find "$PWD" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          echo "Disk after cleanup:"
+          df -h "$PWD" | tail -n +2 || true
+        }
 
         while [ $attempt -le $MAX_RETRIES ]; do
           CURRENT_DEPTH="${DEPTHS[$((attempt-1))]}"
           echo "Attempt $attempt/$MAX_RETRIES: initialize and sync kernel repository (depth=${CURRENT_DEPTH}, sync timeout $SYNC_TIMEOUT)..."
+          df -h "$PWD" | tail -n +2 || true
           if init_repo "$CURRENT_DEPTH"; then
             # Use minimal-shallow variant: current-branch, shallow init done above, reduce files downloaded
             if timeout $SYNC_TIMEOUT repo sync -c --current-branch --no-clone-bundle --no-tags --jobs-checkout=4 -j4; then
@@ -83,7 +97,7 @@ runs:
 
           if [ $attempt -lt $MAX_RETRIES ]; then
             echo "Cleaning workspace and retrying after ${RETRY_DELAY_SHORT}s..."
-            rm -rf .repo || true
+            clean_workspace || true
             sleep $RETRY_DELAY_SHORT
           else
             echo "All $MAX_RETRIES attempts failed." >&2
